@@ -1,0 +1,6 @@
+@FluxoDeTrabalhoAgil.Api_HostAddress = http://localhost:5228
+
+GET {{FluxoDeTrabalhoAgil.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,1806 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+
+<style>
+    .retro-wrapper {
+        min-height: 100vh;
+        padding: 30px;
+        font-family: 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at top left, rgba(37,99,235,.08), transparent 25%), radial-gradient(circle at top right, rgba(124,58,237,.08), transparent 25%), linear-gradient(180deg,#f8fafc,#eef2ff);
+    }
+
+    .retro-header {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient( 135deg, #0f172a, #1e293b, #312e81 );
+        color: white;
+        padding: 40px;
+        border-radius: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 30px 80px rgba(15,23,42,.25);
+    }
+
+        .retro-header::before {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            right: -100px;
+            top: -100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
+
+        .retro-header::after {
+            content: "";
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            left: -80px;
+            bottom: -80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.04);
+        }
+
+    .retro-title h1 {
+        margin: 0;
+    }
+
+    .retro-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+
+        .retro-actions input,
+        .retro-actions select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .retro-actions button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+
+    .kanban {
+        display: grid;
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 20px;
+    }
+
+        .column h2 {
+            text-align: center;
+        }
+
+    .cards {
+        min-height: 650px;
+        max-height: 650px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+        .cards::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .cards::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+    .card {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: grab;
+    }
+
+        .card textarea {
+            width: 100%;
+            border: none;
+            resize: none;
+        }
+
+    .retro-header {
+        background: linear-gradient(135deg,#0f172a,#1e293b);
+        color: white;
+        padding: 30px;
+        border-radius: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,.15);
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 16px;
+        padding: 14px 22px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
+        box-shadow: 0 10px 20px rgba(0,0,0,.08);
+    }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,.15);
+        }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-success {
+        background: #16a34a;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #475569;
+        color: white;
+    }
+
+    .btn-ai {
+        background: linear-gradient(135deg,#7c3aed,#2563eb);
+        color: white;
+    }
+
+    .retro-metrics {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .metric-card {
+        position: relative;
+        overflow: hidden;
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        text-align: center;
+        transition: .25s;
+        box-shadow: 0 15px 40px rgba(0,0,0,.08);
+    }
+
+        .metric-card span {
+            display: block;
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .positive-column {
+        border-top: 6px solid #10b981;
+    }
+
+    .negative-column {
+        border-top: 6px solid #ef4444;
+    }
+
+    .suggestion-column {
+        border-top: 6px solid #3b82f6;
+    }
+
+    .column {
+        position: relative;
+        overflow: hidden;
+        background: rgba(255,255,255,.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,.7);
+        border-radius: 30px;
+        padding: 24px;
+        min-height: 800px;
+        transition: .3s;
+        box-shadow: 0 25px 50px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.7);
+    }
+
+        .column:hover {
+            transform: translateY(-2px);
+        }
+
+        .column::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient( 90deg, transparent, rgba(255,255,255,.9), transparent );
+        }
+
+        .column.drag-over {
+            transform: scale(1.02);
+            box-shadow: 0 35px 80px rgba(37,99,235,.20);
+        }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        padding: 18px;
+        margin-bottom: 15px;
+        transition: .25s;
+        box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+    .ia-section {
+        margin-top: 30px;
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .ia-result {
+        margin-top: 20px;
+        min-height: 250px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 20px;
+    }
+
+    .column-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .column-info {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .column-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: #f1f5f9;
+        font-size: 24px;
+    }
+
+    .column-title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .positive-icon {
+        background: #dcfce7;
+        color: #16a34a;
+        font-weight: 800;
+    }
+
+    .negative-icon {
+        background: #fee2e2;
+        color: #dc2626;
+        font-weight: 800;
+    }
+
+    .suggestion-icon {
+        background: #dbeafe;
+        color: #2563eb;
+        font-weight: 800;
+    }
+
+    .column-counter {
+        background: #e2e8f0;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+
+    .votes {
+        background: #f1f5f9;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+    }
+
+    .retro-search {
+        margin-bottom: 25px;
+    }
+
+        .retro-search input {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        }
+
+    .metric-card {
+        position: relative;
+        overflow: hidden;
+        background: white;
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 20px 40px rgba(15,23,42,.08);
+        transition: .3s;
+    }
+
+        .metric-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            right: -35px;
+            top: -35px;
+            border-radius: 50%;
+            opacity: .1;
+        }
+
+    .positive::after {
+        background: #10b981;
+    }
+
+    .negative::after {
+        background: #ef4444;
+    }
+
+    .suggestion::after {
+        background: #3b82f6;
+    }
+
+    .total::after {
+        background: #7c3aed;
+    }
+
+    .card {
+        position: relative;
+        background: white;
+        border: none;
+        border-radius: 22px;
+        padding: 18px;
+        margin-bottom: 16px;
+        cursor: grab;
+        transition: .25s;
+        box-shadow: 0 10px 25px rgba(15,23,42,.08);
+    }
+
+        .card:hover {
+            transform: translateY(-6px) rotate(.5deg);
+            box-shadow: 0 20px 40px rgba(15,23,42,.15);
+        }
+
+        .card.dragging {
+            opacity: .6;
+            transform: rotate(3deg);
+        }
+
+    .btn-add {
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 18px;
+        padding: 14px;
+        background: linear-gradient( 135deg, #2563eb, #4f46e5 );
+        color: white;
+        font-weight: 700;
+        transition: .25s;
+    }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(37,99,235,.30);
+        }
+
+    .retro-header h1 {
+        font-size: 52px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        margin-bottom: 10px;
+        background: linear-gradient( 90deg, #fff, #cbd5e1 );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    @@keyframes fadeUp{
+
+        from{
+
+            opacity:0;
+
+            transform:
+                translateY(20px);
+
+        }
+
+        to{
+
+            opacity:1;
+
+            transform:
+                translateY(0);
+
+        }
+
+    }
+
+    .metric-card,
+    .column,
+    .ia-section {
+        animation: fadeUp .6s ease;
+    }
+
+    .retro-header-right{
+    display:flex;
+    gap:20px;
+    align-items:end;
+    flex-wrap:wrap;
+}
+
+    .field-group{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .field-group label{
+        font-size:12px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:1px;
+        color:#cbd5e1;
+    }
+
+    .field-group select,
+    .field-group input{
+        min-width:260px;
+        height:54px;
+        border:none;
+        border-radius:18px;
+        background:rgba(255,255,255,.12);
+        backdrop-filter:blur(20px);
+        color:white;
+        padding:0 18px;
+        transition:.25s;
+    }
+
+    .field-group select:focus,
+    .field-group input:focus{
+        outline:none;
+        background:rgba(255,255,255,.18);
+        box-shadow:0 0 0 4px rgba(59,130,246,.35);
+    }
+
+    .campo-obrigatorio{
+        animation:pulseError .7s;
+        border:2px solid #ef4444 !important;
+    }
+
+    @@keyframes pulseError{
+        0%{transform:scale(1)}
+        50%{transform:scale(1.02)}
+        100%{transform:scale(1)}
+    }
+
+    #toast{
+        position:fixed;
+        right:30px;
+        top:30px;
+        z-index:9999;
+    }
+
+    .toast-item{
+        min-width:300px;
+        padding:18px;
+        border-radius:18px;
+        margin-bottom:12px;
+        color:white;
+        font-weight:600;
+        animation:slideToast .3s;
+    }
+
+    .toast-success{
+        background:#16a34a;
+    }
+
+    .toast-error{
+        background:#dc2626;
+    }
+
+    .toast-info{
+        background:#2563eb;
+    }
+
+    @@keyframes slideToast{
+        from{
+            opacity:0;
+            transform:translateX(50px);
+        }
+        to{
+            opacity:1;
+            transform:translateX(0);
+        }
+    }
+
+    .retro-search label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+        .search-box span {
+            position: absolute;
+            left: 18px;
+            top: 16px;
+            font-size: 18px;
+        }
+
+        .search-box input {
+            padding-left: 55px !important;
+        }
+
+    .metric-card.positive {
+        border-left: 6px solid #10b981;
+    }
+
+    .metric-card.negative {
+        border-left: 6px solid #ef4444;
+    }
+
+    .metric-card.suggestion {
+        border-left: 6px solid #3b82f6;
+    }
+
+    .metric-card.total {
+        border-left: 6px solid #7c3aed;
+    }
+
+    #positivo .card {
+        border-left: 5px solid #10b981;
+    }
+
+    #negativo .card {
+        border-left: 5px solid #ef4444;
+    }
+
+    #sugestao .card {
+        border-left: 5px solid #3b82f6;
+    }
+
+    .card-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+        .card-actions button {
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: #f1f5f9;
+        }
+
+    .card-voting {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+        .card-voting button {
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+    .column-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -.5px;
+        color: #0f172a;
+    }
+
+    .positive-column .column-title {
+        color: #059669;
+    }
+
+    .negative-column .column-title {
+        color: #dc2626;
+    }
+
+    .suggestion-column .column-title {
+        color: #2563eb;
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .card-voting-inline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .card-voting-inline button,
+        .delete-card {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 12px;
+            background: #f1f5f9;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+            .card-voting-inline button:hover,
+            .delete-card:hover {
+                transform: scale(1.08);
+            }
+
+    .vote-count {
+        font-size: 15px;
+        font-weight: 700;
+        min-width: 25px;
+        text-align: center;
+    }
+
+    .card textarea {
+        width: 100%;
+        border: none;
+        resize: none;
+        background: transparent;
+        min-height: 120px;
+        font-size: 15px;
+        color: #334155;
+        outline: none;
+        line-height: 1.6;
+    }
+
+        .card textarea::placeholder {
+            color: #94a3b8;
+        }
+
+    .card {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            opacity: .4;
+        }
+
+    .card-text::placeholder {
+        color: #94a3b8;
+        font-style: italic;
+        font-size: 14px;
+    }
+
+    #cmbSprint {
+        min-width: 260px;
+        padding: 12px 16px;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 12px;
+        background: #1E293B;
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .25s ease;
+        outline: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+
+        #cmbSprint:hover {
+            border-color: #3B82F6;
+        }
+
+        #cmbSprint:focus {
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 4px rgba(59,130,246,.25);
+        }
+
+        #cmbSprint option {
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 10px;
+        }
+</style>
+
+<div class="retro-wrapper">
+
+    <div class="retro-header">
+
+        <div class="retro-header-left">
+
+            <div class="retro-badge">
+                Sprint Retrospective
+            </div>
+
+            <h1>
+                Retrospective Board
+            </h1>
+
+            <p>
+                Analise a Sprint, organize feedbacks e gere insights inteligentes com IA.
+            </p>
+
+        </div>
+
+        <div class="retro-header-right">
+
+            <div class="field-group">
+
+                <label>Sprint</label>
+
+                <select id="cmbSprint"
+                        onchange="carregarSprint(this.value)">
+                    <option value="">
+                        Nova Sprint
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="field-group">
+
+                <label>Nome da Sprint</label>
+
+                <input id="nomeSprint"
+                       placeholder="Ex: Sprint 25 - Portal RH">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="toolbar">
+
+        <button class="btn btn-secondary"
+                onclick="novaSprint()">
+            🚀 Nova Sprint
+        </button>
+
+        <button class="btn btn-primary"
+                onclick="salvarSprint()">
+            💾 Salvar
+        </button>
+
+        <button class="btn btn-danger"
+                onclick="exportarPDF()">
+            📄 PDF
+        </button>
+
+        <button class="btn btn-success"
+                onclick="exportarExcel()">
+            📊 Excel
+        </button>
+
+        <button class="btn btn-ai"
+                onclick="gerarInsightsIA()">
+            🤖 Gerar Insights IA
+        </button>
+
+    </div>
+
+    <div class="retro-search">
+
+        <label>
+            Pesquisar feedbacks
+        </label>
+
+        <div class="search-box">
+
+            <span>
+                🔍
+            </span>
+
+            <input type="text"
+                   id="txtPesquisar"
+                   placeholder="Pesquisar cards..."
+                   onkeyup="filtrarCards()">
+
+        </div>
+
+    </div>
+
+    <div class="retro-metrics">
+
+        <div class="metric-card positive">
+            <span id="totalPositivos">0</span>
+            <small>Pontos Positivos</small>
+        </div>
+
+        <div class="metric-card negative">
+            <span id="totalNegativos">0</span>
+            <small>Pontos Negativos</small>
+        </div>
+
+        <div class="metric-card suggestion">
+            <span id="totalSugestoes">0</span>
+            <small>Melhorias</small>
+        </div>
+
+        <div class="metric-card total">
+            <span id="totalCards">0</span>
+            <small>Total de Pontos</small>
+        </div>
+
+    </div>
+
+    <div class="kanban">
+
+        <div class="column positive-column"
+             ondrop="drop(event)"
+             ondragover="allowDrop(event)"
+             data-status="positivo">
+
+            <div class="column-header">
+                <h2 class="column-title">
+                    Positivos
+                </h2>
+            </div>
+           
+            <div class="cards" id="positivo"></div>
+            <button class="btn-add"
+                    onclick="addCard('positivo')">
+
+                ➕ Novo Card
+
+            </button>
+        </div>
+
+        <div class="column negative-column"
+             ondrop="drop(event)"
+             ondragover="allowDrop(event)"
+             data-status="negativo">
+
+            <div class="column-header">
+
+                <h2 class="column-title">
+                    Negativos
+                </h2>
+            </div>
+
+            
+            
+            <div class="cards" id="negativo"></div>
+            <button class="btn-add"
+                    onclick="addCard('negativo')">
+
+                ➕ Novo Card
+
+            </button>
+        </div>
+
+        <div class="column suggestion-column"
+             ondrop="drop(event)"
+             ondragover="allowDrop(event)"
+             data-status="sugestao">
+
+            <div class="column-header">
+
+                <h2 class="column-title">
+                    Melhorias
+                </h2>
+
+            </div>
+         
+            <div class="cards" id="sugestao"></div>
+            <button class="btn-add"
+                    onclick="addCard('sugestao')">
+
+                ➕ Novo Card
+
+            </button>
+        </div>
+
+    </div>
+
+    <div class="ia-section">
+
+        <div class="ia-header">
+
+            <h2>
+                🤖 Análise Inteligente da Sprint
+            </h2>
+
+        </div>
+
+        <div id="resultadoIA"
+             class="ia-result">
+
+            <div class="ia-placeholder">
+
+                Adicione feedbacks positivos, negativos e sugestões para gerar uma análise completa da Sprint.
+
+            </div>
+
+        </div>
+
+    </div>
+    <div id="toast"></div>
+</div>
+
+<script>
+    const API =
+        "http://localhost:5228/api/retro";
+    let cardId = 0;
+    let sprintAtualId = 0;
+
+    function addCard(status) {
+
+        const container = document.getElementById(status);
+
+        const id = "card-" + cardId++;
+
+        const div = document.createElement("div");
+
+        div.className = "card";
+        div.draggable = true;
+        div.id = id;
+
+        div.ondragstart = drag;
+
+        div.innerHTML = `
+
+            <div class="card-top">
+
+                <div class="card-voting-inline">
+
+                    <button onclick="votar(this,1)">
+                        👍
+                    </button>
+
+                    <span class="vote-count">
+                        0
+                    </span>
+
+                    <button onclick="votar(this,-1)">
+                        👎
+                    </button>
+
+                </div>
+
+                <button class="delete-card"
+                        onclick="removerCard(this)">
+                    🗑️
+                </button>
+
+            </div>
+
+                <textarea
+            class="card-text"
+            placeholder="Digite seu feedback aqui..."></textarea>
+
+        `;
+
+        container.appendChild(div);
+
+        div
+            .querySelector("textarea")
+            .focus();
+
+        atualizarContadores();
+    }
+
+    function allowDrop(ev) {
+
+        ev.preventDefault();
+
+        ev.currentTarget.classList.add(
+            "drag-over"
+        );
+    }
+
+    function drag(ev) {
+
+        ev.target.classList.add(
+            "dragging"
+        );
+
+        ev.dataTransfer.setData(
+            "text",
+            ev.target.id
+        );
+    }
+
+    document.addEventListener(
+        "dragend",
+        function () {
+
+            document
+                .querySelectorAll(".card")
+                .forEach(x =>
+                    x.classList.remove(
+                        "dragging"
+                    ));
+
+        });
+
+    function drop(ev) {
+
+        ev.preventDefault();
+
+        ev.currentTarget.classList.remove(
+            "drag-over"
+        );
+
+        const id =
+            ev.dataTransfer.getData("text");
+
+        const card =
+            document.getElementById(id);
+
+        ev.currentTarget
+            .querySelector(".cards")
+            .appendChild(card);
+
+        atualizarContadores();
+    }
+
+    async function salvarSprint() {
+
+        const cards = [];
+
+        document.querySelectorAll("#positivo .card")
+            .forEach(card => {
+
+                cards.push({
+                    tipo: "positivo",
+                    texto: card.querySelector("textarea").value,
+                    votos: parseInt(
+                        card.querySelector(".vote-count").innerText
+                    ) || 0
+                });
+
+            });
+
+        document.querySelectorAll("#negativo .card")
+            .forEach(card => {
+
+                cards.push({
+                    tipo: "negativo",
+                    texto: card.querySelector("textarea").value,
+                    votos: parseInt(
+                        card.querySelector(".vote-count").innerText
+                    ) || 0
+                });
+
+            });
+
+        document.querySelectorAll("#sugestao .card")
+            .forEach(card => {
+
+                cards.push({
+                    tipo: "sugestao",
+                    texto: card.querySelector("textarea").value,
+                    votos: parseInt(
+                        card.querySelector(".vote-count").innerText
+                    ) || 0
+                });
+
+            });
+
+        const payload = {
+
+            id: sprintAtualId,
+
+            nomeSprint:
+                document.getElementById("nomeSprint").value,
+
+            cards
+        };
+
+        const metodo = "POST";
+
+        const url = API;
+
+        try {
+
+            const response =
+                await fetch(url, {
+
+                    method: metodo,
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(payload)
+                });
+
+            if (!response.ok)
+                throw await response.text();
+
+            const resultado =
+                await response.json();
+
+            sprintAtualId =
+                resultado.id;
+
+            showToast(
+                "Sprint salva com sucesso",
+                "success"
+            );
+
+            await carregarSprints();
+
+            document.getElementById(
+                "cmbSprint"
+            ).value = sprintAtualId;
+        }
+        catch (err) {
+
+            console.error(err);
+
+            showToast(
+                "Erro ao salvar sprint",
+                "error"
+            );
+        }
+    }
+
+    function getCards(col) {
+
+        return [...document.querySelectorAll("#" + col + " .card textarea")]
+            .map(x => x.value);
+    }
+
+    function novaSprint() {
+
+        sprintAtualId = 0;
+
+        document
+            .getElementById("nomeSprint")
+            .value = "";
+
+        document
+            .getElementById("txtPesquisar")
+            .value = "";
+
+        document
+            .getElementById("resultadoIA")
+            .innerHTML = `
+
+    <div class="ia-empty">
+        <p>
+            Adicione feedbacks positivos,
+            negativos e sugestões para
+            gerar uma análise completa
+            da Sprint.
+        </p>
+
+    </div>
+
+    `;
+
+        ["positivo", "negativo", "sugestao"]
+            .forEach(x => {
+
+                document
+                    .getElementById(x)
+                    .innerHTML = "";
+
+            });
+
+        atualizarContadores();
+
+        showToast(
+            "Nova Sprint criada",
+            "success"
+        );
+    }
+
+    function exportarPDF() {
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF("p", "mm", "a4");
+
+        const valor = v =>
+            v && v.toString().trim() ? v : "-";
+
+        const getCards = (selector) => {
+            return [...document.querySelectorAll(selector)]
+                .map(c => ({
+                    texto: (c.querySelector("textarea")?.value || "").trim(),
+                    votos: parseInt(c.querySelector(".vote-count")?.innerText) || 0
+                }));
+        };
+
+        const positivos = getCards("#positivo .card");
+        const negativos = getCards("#negativo .card");
+        const sugestoes = getCards("#sugestao .card");
+
+        const positivosTotal = positivos.reduce((acc, c) => acc + (1 + (c.votos || 0)), 0);
+        const negativosTotal = negativos.reduce((acc, c) => acc + (1 + (c.votos || 0)), 0);
+        const sugestoesTotal = sugestoes.reduce((acc, c) => acc + (1 + (c.votos || 0)), 0);
+
+        const totalCards =
+            positivosTotal +
+            negativosTotal +
+            sugestoesTotal;
+
+        let y = 15;
+
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, 210, 25, "F");
+
+        doc.setTextColor(255);
+        doc.setFontSize(20);
+        doc.text("SPRINT RETROSPECTIVE", 14, 16);
+
+        doc.setFontSize(10);
+        doc.text(valor(document.getElementById("nomeSprint").value), 14, 22);
+
+        y = 35;
+
+        function titulo(texto, cor) {
+            doc.setFillColor(...cor);
+            doc.rect(10, y - 5, 190, 8, "F");
+
+            doc.setTextColor(255);
+            doc.setFontSize(11);
+            doc.text(texto, 13, y);
+
+            doc.setTextColor(0);
+            y += 12;
+        }
+
+        function linha(label, value) {
+            doc.setFontSize(10);
+            doc.setFont(undefined, "bold");
+            doc.text(label + ":", 12, y);
+
+            doc.setFont(undefined, "normal");
+            doc.text(String(value), 70, y);
+
+            y += 6;
+        }
+
+        function cardItem(card) {
+
+            const texto = card.texto.length > 0 ? card.texto : "-";
+            const votos = card.votos || 0;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, "normal");
+
+            doc.text(`• ${votos} - ${texto}`, 12, y);
+
+            y += 6;
+
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+        }
+
+        titulo("MÉTRICAS", [100, 116, 139]);
+        linha("Pontos Positivos", positivosTotal);
+        linha("Pontos Negativos", negativosTotal);
+        linha("Melhorias", sugestoesTotal);
+        linha("Total Cards", totalCards);
+
+        y += 4;
+
+        titulo("POSITIVOS", [16, 163, 74]);
+        positivos.forEach(cardItem);
+
+        titulo("NEGATIVOS", [220, 38, 38]);
+        negativos.forEach(cardItem);
+
+        titulo("MELHORIAS", [37, 99, 235]);
+        sugestoes.forEach(cardItem);
+
+        doc.save(`SprintRetrospective_${valor(document.getElementById("nomeSprint").value)}.pdf`);
+    }
+
+    function exportarExcel() {
+
+        const wb = XLSX.utils.book_new();
+
+        const valor = v =>
+            v && v.toString().trim() ? v : "-";
+
+        const getCards = (selector) => {
+            return [...document.querySelectorAll(selector)]
+                .map(c => ({
+                    texto: c.querySelector("textarea")?.value || "",
+                    votos: parseInt(c.querySelector(".vote-count")?.innerText) || 0
+                }));
+        };
+
+        const positivos = getCards("#positivo .card");
+        const negativos = getCards("#negativo .card");
+        const sugestoes = getCards("#sugestao .card");
+
+        const positivosTotal = positivos.reduce((a, c) => a + (1 + (c.votos || 0)), 0);
+        const negativosTotal = negativos.reduce((a, c) => a + (1 + (c.votos || 0)), 0);
+        const sugestoesTotal = sugestoes.reduce((a, c) => a + (1 + (c.votos || 0)), 0);
+
+        const totalCards =
+            positivosTotal +
+            negativosTotal +
+            sugestoesTotal;
+
+        const dados = [];
+
+        dados.push(["SPRINT RETROSPECTIVE"]);
+        dados.push([]);
+        dados.push(["Nome Sprint", valor(document.getElementById("nomeSprint").value)]);
+        dados.push([]);
+
+        dados.push(["MÉTRICAS"]);
+        dados.push(["Pontos Positivos", positivosTotal]);
+        dados.push(["Pontos Negativos", negativosTotal]);
+        dados.push(["Melhorias", sugestoesTotal]);
+        dados.push(["Total Cards", totalCards]);
+        dados.push([]);
+
+        dados.push(["POSITIVOS"]);
+        positivos.forEach(x =>
+            dados.push([`• ${x.votos} - ${x.texto || "-"}`])
+        );
+        dados.push([]);
+
+        dados.push(["NEGATIVOS"]);
+        negativos.forEach(x =>
+            dados.push([`• ${x.votos} - ${x.texto || "-"}`])
+        );
+        dados.push([]);
+
+        dados.push(["MELHORIAS"]);
+        sugestoes.forEach(x =>
+            dados.push([`• ${x.votos} - ${x.texto || "-"}`])
+        );
+
+        const ws = XLSX.utils.aoa_to_sheet(dados);
+
+        ws["!cols"] = [{ wch: 120 }];
+
+        const styles = {
+            POSITIVOS: { fill: "16A34A", font: "FFFFFF" },
+            NEGATIVOS: { fill: "DC2626", font: "FFFFFF" },
+            MELHORIAS: { fill: "2563EB", font: "FFFFFF" },
+            MÉTRICAS: { fill: "334155", font: "FFFFFF" }
+        };
+
+        Object.keys(ws).forEach(cell => {
+
+            if (cell.startsWith("!")) return;
+
+            const value = ws[cell].v;
+
+            if (styles[value]) {
+                ws[cell].s = {
+                    font: { bold: true, color: { rgb: styles[value].font } },
+                    fill: { fgColor: { rgb: styles[value].fill } }
+                };
+            }
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws, "Sprint");
+
+        XLSX.writeFile(
+            wb,
+            `SprintRetrospective_${valor(document.getElementById("nomeSprint").value)}.xlsx`
+        );
+    }
+
+    function carregarSprints() {
+        fetch(API)
+            .then(r => r.json())
+            .then(data => {
+
+                const cmb = document.getElementById("cmbSprint");
+                cmb.innerHTML = `<option value="">Nova Sprint</option>`;
+
+                data.forEach(x => {
+                    cmb.innerHTML += `<option value="${x.id}">${x.nomeSprint}</option>`;
+                });
+            });
+    }
+
+    async function carregarSprint(id) {
+
+        if (!id) {
+
+            novaSprint();
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(`${API}/${id}`);
+
+            const data =
+                await response.json();
+
+            sprintAtualId =
+                data.id;
+
+            document.getElementById(
+                "nomeSprint"
+            ).value =
+                data.nomeSprint || "";
+
+            preencher(
+                "positivo",
+                data.cards.filter(x =>
+                    x.tipo === "positivo")
+            );
+
+            preencher(
+                "negativo",
+                data.cards.filter(x =>
+                    x.tipo === "negativo")
+            );
+
+            preencher(
+                "sugestao",
+                data.cards.filter(x =>
+                    x.tipo === "sugestao")
+            );
+
+            atualizarContadores();
+
+            showToast(
+                "Sprint carregada",
+                "success"
+            );
+        }
+        catch (e) {
+
+            console.error(e);
+
+            showToast(
+                "Erro ao carregar Sprint",
+                "error"
+            );
+        }
+    }
+
+    function preencher(col, lista) {
+
+        const container =
+            document.getElementById(col);
+
+        container.innerHTML = "";
+
+        lista.forEach(card => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "card";
+
+            div.draggable = true;
+
+            div.ondragstart = drag;
+
+            div.id =
+                "card-" + cardId++;
+
+            div.innerHTML = `
+
+                <div class="card-top">
+
+                    <div class="card-voting-inline">
+
+                        <button onclick="votar(this,1)">
+                            👍
+                        </button>
+
+                        <span class="vote-count">
+                            ${card.votos || 0}
+                        </span>
+
+                        <button onclick="votar(this,-1)">
+                            👎
+                        </button>
+
+                    </div>
+
+                    <button class="delete-card"
+                            onclick="removerCard(this)">
+                        🗑️
+                    </button>
+
+                </div>
+
+                <textarea
+                class="card-text">${card.texto || ""}</textarea>
+
+            `;
+
+            container.appendChild(div);
+        });
+    }
+
+    window.onload = carregarSprints;
+
+    async function gerarInsightsIA() {
+        document
+            .getElementById("resultadoIA")
+            .scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+    const positivos =
+        getCards("positivo");
+
+    const negativos =
+        getCards("negativo");
+
+    const sugestoes =
+        getCards("sugestao");
+
+    document.getElementById(
+        "resultadoIA"
+    ).innerHTML = `
+        <div class="loading-ai">
+            🤖 Analisando Sprint...
+        </div>
+    `;
+
+    try {
+
+        const response =
+                await fetch(
+                    `${API}/gerar-insights`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        positivos,
+                        negativos,
+                        sugestoes
+                    })
+                });
+
+        const texto =
+            await response.text();
+
+        document.getElementById(
+            "resultadoIA"
+        ).innerHTML = texto;
+    }
+    catch {
+
+        document.getElementById(
+            "resultadoIA"
+        ).innerHTML = `
+            <div class="erro-ai">
+                Erro ao gerar insights.
+            </div>
+        `;
+    }
+}
+
+    function atualizarContadores() {
+
+        const cardsPositivos =
+            document.querySelectorAll(
+                "#positivo .card"
+            );
+
+        let positivos = 0;
+
+        cardsPositivos.forEach(card => {
+
+            positivos += 1;
+
+            const votos =
+                parseInt(
+                    card.querySelector(
+                        ".vote-count"
+                    ).innerText
+                ) || 0;
+
+            positivos += votos;
+        });
+
+        const cardsNegativos =
+            document.querySelectorAll(
+                "#negativo .card"
+            );
+
+        let negativos = 0;
+
+        cardsNegativos.forEach(card => {
+
+            negativos += 1;
+
+            const votos =
+                parseInt(
+                    card.querySelector(
+                        ".vote-count"
+                    ).innerText
+                ) || 0;
+
+            negativos += votos;
+        });
+
+        const sugestoes =
+            document.querySelectorAll(
+                "#sugestao .card"
+            );
+
+        let sugestoesTotal = 0;
+
+        sugestoes.forEach(card => {
+
+            sugestoesTotal += 1;
+
+            const votos =
+                parseInt(
+                    card.querySelector(
+                        ".vote-count"
+                    ).innerText
+                ) || 0;
+
+            sugestoesTotal += votos;
+        });
+
+        document.getElementById(
+            "totalPositivos"
+        ).innerText = positivos;
+
+        document.getElementById(
+            "totalNegativos"
+        ).innerText = negativos;
+
+        document.getElementById(
+            "totalSugestoes"
+        ).innerText = sugestoesTotal;
+
+        document.getElementById(
+            "totalCards"
+        ).innerText = positivos + negativos + sugestoesTotal;
+    }
+
+    function filtrarCards() {
+
+        const termo =
+            document.getElementById(
+                "txtPesquisar"
+            ).value.toLowerCase();
+
+        document
+            .querySelectorAll(".card")
+            .forEach(card => {
+
+                    const texto =
+                        card.querySelector("textarea")
+                            ?.value
+                            .toLowerCase() || "";
+
+                card.style.display =
+                    texto.includes(termo)
+                    ? ""
+                    : "none";
+
+            });
+
+    }
+
+    function removerCard(btn) {
+
+        btn.closest(".card").remove();
+
+        atualizarContadores();
+
+    }
+
+    function showToast(msg, tipo = "info") {
+
+        const toast =
+            document.createElement("div");
+
+        toast.className =
+            `toast-item toast-${tipo}`;
+
+        toast.innerHTML = msg;
+
+        document
+            .getElementById("toast")
+            .appendChild(toast);
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 3000);
+    }
+
+    function votar(btn, valor) {
+
+        const span =
+            btn.parentElement
+                .querySelector(".vote-count");
+
+        let atual =
+            parseInt(span.innerText);
+
+        atual += valor;
+
+        if (atual < 0)
+            atual = 0;
+
+        span.innerText = atual;
+        atualizarContadores();
+    }
+</script>

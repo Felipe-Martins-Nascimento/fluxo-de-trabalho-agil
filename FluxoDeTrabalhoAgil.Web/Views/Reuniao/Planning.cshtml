@@ -1,0 +1,3022 @@
+﻿@{
+    Layout = "_Layout";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+
+<style>
+    body {
+        min-height: 100vh;
+        font-family: 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at top left, rgba(59,130,246,.18), transparent 22%), radial-gradient(circle at bottom right, rgba(139,92,246,.16), transparent 25%), linear-gradient(135deg,#eef4ff 0%,#f8fbff 45%,#f4f7ff 100%);
+        background-attachment: fixed;
+    }
+
+    .planning-wrapper {
+        max-width: 1800px;
+        margin: auto;
+        padding: 35px;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .planning-header {
+        background: rgba(255,255,255,.82);
+        backdrop-filter: blur(25px);
+        border-radius: 35px;
+        padding: 35px;
+        border: 1px solid rgba(255,255,255,.5);
+        box-shadow: 0 20px 50px rgba(37,99,235,.10);
+    }
+
+    .planning-title {
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #2563eb, #7c3aed, #0f172a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+    }
+
+        .planning-title::after {
+            content: "🚀";
+            position: absolute;
+            top: -6px;
+            right: -40px;
+            font-size: 22px;
+            animation: pulseIcon 2s infinite;
+        }
+
+    .planning-subtitle {
+        color: #475569;
+        font-size: 16px;
+    }
+
+    .top-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+
+    .glass-card {
+        background: rgba(255,255,255,.82);
+        backdrop-filter: blur(25px);
+        border-radius: 30px;
+        padding: 28px;
+        border: 1px solid rgba(255,255,255,.5);
+        box-shadow: 0 20px 50px rgba(37,99,235,.08);
+    }
+
+    .section-title {
+        font-size: 25px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 20px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(400px,1fr));
+        gap: 25px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+        gap: 25px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .input-label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .input,
+    textarea,
+    select {
+        width: 100%;
+        border: none;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+        font-size: 15px;
+        outline: none;
+        border: 1px solid #dbeafe;
+        transition: .25s;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 140px;
+    }
+
+        .input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 5px rgba(37,99,235,.12);
+        }
+
+    .btn-primary {
+        border: none;
+        background: linear-gradient(135deg,#2563eb,#1d4ed8);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+        }
+
+    .btn-danger {
+        border: none;
+        background: linear-gradient(135deg,#ef4444,#dc2626);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        border: none;
+        background: #e2e8f0;
+        color: #0f172a;
+        padding: 15px 25px;
+        border-radius: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg,#ffffff,#eff6ff);
+        border-radius: 24px;
+        padding: 25px;
+        border: 1px solid #dbeafe;
+    }
+
+    .metric-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+
+    .metric-number {
+        font-size: 42px;
+        font-weight: 900;
+        color: #2563eb;
+    }
+
+    .metric-sub {
+        margin-top: 10px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .health-box {
+        background: linear-gradient(135deg,#fff,#f8fbff);
+        border: 1px solid #dbeafe;
+        border-radius: 25px;
+        padding: 25px;
+    }
+
+    .health-range {
+        width: 100%;
+    }
+
+    .health-status {
+        margin-top: 18px;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .health-progress {
+        width: 100%;
+        height: 18px;
+        border-radius: 30px;
+        background: #e2e8f0;
+        overflow: hidden;
+        margin-top: 18px;
+    }
+
+    .health-progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(135deg,#22c55e,#16a34a);
+        transition: .4s;
+    }
+
+    .backlog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(380px,1fr));
+        gap: 25px;
+    }
+
+    .task-column {
+        background: linear-gradient(135deg,#fff,#f8fbff);
+        border-radius: 28px;
+        padding: 25px;
+        border: 1px solid #dbeafe;
+        height: 520px;
+        overflow-y: auto;
+    }
+
+        .task-column::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .task-column::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .task-column::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .task-column h3 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+    .task-card {
+        background: white;
+        border-radius: 22px;
+        padding: 20px;
+        margin-bottom: 18px;
+        border: 1px solid #dbeafe;
+        box-shadow: 0 10px 25px rgba(37,99,235,.08);
+    }
+
+    .task-name {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.5;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .task-points {
+        margin-top: 10px;
+        font-weight: 700;
+        color: #334155;
+        font-size: 14px;
+    }
+
+    .task-priority {
+        margin-top: 8px;
+        display: inline-flex;
+        padding: 8px 14px;
+        border-radius: 30px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg,#ffffff,#eff6ff);
+        border-radius: 30px;
+        padding: 35px;
+        border: 1px solid #dbeafe;
+    }
+
+    .summary-line {
+        margin-bottom: 18px;
+        line-height: 1.8;
+        color: #334155;
+    }
+
+        .summary-line strong {
+            color: #0f172a;
+        }
+
+    .sprint-header-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(350px,1fr));
+        gap: 25px;
+    }
+
+    .sprint-box {
+        background: linear-gradient(135deg,#ffffff,#eff6ff);
+        border-radius: 25px;
+        padding: 25px;
+        border: 1px solid #dbeafe;
+    }
+
+    .toast {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        background: #0f172a;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 15px;
+        opacity: 0;
+        transition: .3s;
+        z-index: 999999;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg,#2563eb,#1d4ed8);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg,#ef4444,#dc2626);
+        color: white;
+    }
+
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+    .priority-alta {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .priority-média {
+        background: #fef9c3;
+        color: #ca8a04;
+    }
+
+    .priority-baixa {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .priority-sem {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .input-error {
+        border: 2px solid #ef4444 !important;
+        animation: shake .2s linear 2;
+    }
+
+    @@keyframes shake {
+
+        0% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-4px);
+        }
+
+        50% {
+            transform: translateX(4px);
+        }
+
+        75% {
+            transform: translateX(-4px);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15,23,42,.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+        padding: 20px;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        border-radius: 28px;
+        padding: 30px;
+        position: relative;
+        animation: modalShow .2s ease;
+    }
+
+    @@keyframes modalShow {
+
+        from {
+            transform: scale(.9);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .modal-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 20px;
+    }
+
+    .modal-close {
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: #f1f5f9;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .card-alta {
+        border-left: 6px solid #dc2626;
+        background: linear-gradient(135deg,#fff,#fef2f2);
+    }
+
+    .card-média {
+        border-left: 6px solid #ca8a04;
+        background: linear-gradient(135deg,#fff,#fefce8);
+    }
+
+    .card-baixa {
+        border-left: 6px solid #16a34a;
+        background: linear-gradient(135deg,#fff,#f0fdf4);
+    }
+
+    .card-sem {
+        border-left: 6px solid #94a3b8;
+    }
+
+    .modal-task-name {
+        margin-top: 15px;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #health {
+        display: none;
+    }
+
+    #health {
+        visibility: hidden;
+        height: 0;
+    }
+
+    .btn-salvando {
+        animation: pulseSave .6s infinite alternate;
+    }
+
+    @@keyframes pulseSave {
+
+        from {
+            transform: scale(1);
+        }
+
+        to {
+            transform: scale(1.06);
+        }
+    }
+
+    .summary-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .summary-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        box-shadow: 0 10px 30px rgba(37,99,235,.28);
+    }
+
+    .summary-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+
+    .summary-subtitle {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .summary-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-export {
+        border: none;
+        outline: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 22px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-export span {
+        font-size: 18px;
+    }
+
+    .btn-pdf {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 10px 24px rgba(239,68,68,.28);
+    }
+
+    .btn-excel {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        box-shadow: 0 10px 24px rgba(34,197,94,.28);
+    }
+
+    .btn-export:hover {
+        transform:
+            translateY(-3px)
+            scale(1.02);
+        filter: brightness(1.05);
+    }
+
+    .btn-export:active {
+        transform: scale(.96);
+    }
+
+    .btn-export::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+        transition: .6s;
+    }
+
+    .btn-export:hover::before {
+        left: 120%;
+    }
+
+    .summary-container {
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
+        border-radius: 28px;
+        padding: 30px;
+        border: 1px solid rgba(226,232,240,.9);
+        box-shadow: 0 20px 45px rgba(15,23,42,.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .summary-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, #2563eb, #22c55e, #f59e0b, #ef4444);
+    }
+
+    .summary-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        margin-bottom: 12px;
+        background: rgba(248,250,252,.95);
+        border: 1px solid rgba(226,232,240,.9);
+        transition: .22s ease;
+    }
+
+    .summary-line:hover {
+        transform: translateX(5px);
+        background: rgba(241,245,249,.95);
+        border-color: rgba(59,130,246,.35);
+        box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    }
+
+    .summary-line strong {
+        color: #0f172a;
+        font-size: 14px;
+    }
+
+    .summary-line span {
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .health-wrapper {
+        margin-top: 22px;
+    }
+
+    .health-bar-bg {
+        width: 100%;
+        height: 18px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .health-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+        transition: width .4s ease;
+    }
+
+    .health-bar-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,.4), transparent);
+        animation: brilhoHealth 2.5s linear infinite;
+    }
+
+    @@keyframes brilhoHealth {
+
+        from {
+            transform: translateX(-100%);
+        }
+
+        to {
+            transform: translateX(300%);
+        }
+    }
+
+    @@media (max-width: 768px) {
+
+        .summary-topbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .summary-actions {
+            width: 100%;
+        }
+
+        .btn-export {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .summary-line {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    .task-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        backdrop-filter: blur(10px);
+    }
+
+        .task-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(15,23,42,.12);
+        }
+
+        .task-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient( 135deg, rgba(255,255,255,.12), transparent );
+            pointer-events: none;
+        }
+
+    .task-name {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.4;
+    }
+
+    .task-points {
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .task-priority {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+    }
+
+    #toast {
+        position: fixed;
+        right: 28px;
+        bottom: 28px;
+        background: linear-gradient( 135deg, #0f172a, #1e293b );
+        color: white;
+        padding: 18px 24px;
+        border-radius: 18px;
+        font-weight: 700;
+        box-shadow: 0 20px 40px rgba(15,23,42,.25);
+        z-index: 999999;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity .35s ease, transform .35s ease;
+        backdrop-filter: blur(12px);
+    }
+
+    .planning-header,
+    .glass-card,
+    .metric-card,
+    .health-box,
+    .task-column,
+    .task-card,
+    .sprint-box,
+    .summary-container,
+    .modal-box {
+        border: 1.5px solid rgba(37, 99, 235, .18) !important;
+    }
+
+    .planning-header,
+    .glass-card,
+    .metric-card,
+    .health-box,
+    .task-column,
+    .sprint-box,
+    .summary-container,
+    .modal-box {
+        box-shadow: 0 0 0 1px rgba(37, 99, 235, .08), 0 12px 30px rgba(37, 99, 235,.08), 0 6px 12px rgba(0,0,0,.04);
+    }
+
+        .planning-header:hover,
+        .glass-card:hover,
+        .metric-card:hover,
+        .health-box:hover,
+        .task-column:hover,
+        .sprint-box:hover,
+        .summary-container:hover {
+            border-color: rgba(37, 99, 235, .45);
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, .25), 0 18px 40px rgba(37, 99, 235,.12);
+            transform: translateY(-2px);
+            transition: .25s ease;
+        }
+
+    .planning-header {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(248,250,255,.85));
+        backdrop-filter: blur(28px);
+        border-radius: 28px;
+        padding: 40px;
+        border: 1.5px solid rgba(37,99,235,.25);
+        box-shadow: 0 20px 60px rgba(37,99,235,.12);
+        transition: .3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+        .planning-header::before {
+            content: "";
+            position: absolute;
+            inset: -50%;
+            background: radial-gradient(circle, rgba(37,99,235,.10), transparent 60%);
+            pointer-events: none;
+        }
+
+        .planning-header::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 5px;
+            width: 100%;
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #22c55e, #f59e0b);
+        }
+
+    .header-top {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .planning-title {
+        font-size: 54px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2563eb, #7c3aed, #0f172a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .planning-subtitle {
+        font-size: 15px;
+        color: #64748b;
+    }
+
+    .top-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 18px;
+        padding-top: 2px;
+        border-top: 1px solid rgba(226,232,240,.7);
+    }
+
+    .actions-left {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .actions-right {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .sprint-select select {
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        min-width: 220px;
+        max-width: 260px;
+    }
+
+    .planning-header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    } 
+
+    .header-top {
+        display: flex;
+        flex-direction: column;
+        gap: 2px; 
+        margin-bottom: 4px;
+    }
+
+    .top-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; 
+        flex-wrap: nowrap; 
+        gap: 18px;
+        padding-top: 4px; 
+        border-top: 1px solid rgba(226,232,240,.7);
+    }
+
+    .actions-left {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .actions-right {
+        display: flex;
+        align-items: center; 
+        gap: 12px;
+        flex-shrink: 0;
+    }
+
+    .sprint-select {
+        width: 100%;
+        max-width: 650px; 
+    }
+
+    .input-group {
+        margin-bottom: 6px;
+    }
+
+    .sprint-select select {
+        width: 100%;
+        min-width: 450px;
+        padding: 12px 14px;
+        border-radius: 12px;
+    }
+</style>
+
+<div class="planning-wrapper">
+
+    <div class="planning-header">
+
+        <div class="header-top">
+            <div class="planning-title">Sprint Planning</div>
+            <div class="planning-subtitle">
+                Planejamento completo da Sprint Scrum.
+            </div>
+        </div>
+
+        <div class="top-actions">
+
+            <div class="actions-left" style="flex: 1;">
+
+                <div class="input-group sprint-select">
+                    <label class="input-label">Selecionar Sprint</label>
+
+                    <select id="filtroSprint" onchange="trocarSprint()">
+                        <option value="">Nova Sprint</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="actions-right">
+
+                <button class="btn-primary" onclick="novaSprint()">
+                    🚀 Nova Sprint
+                </button>
+
+                <button class="btn-secondary" onclick="salvarPlanning()">
+                    💾 Salvar Sprint
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="sprint-header-box">
+
+        <div class="sprint-box">
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Nome da Sprint
+                </label>
+
+                <input type="text"
+                       id="nomeSprint"
+                       oninput="atualizarResumo()"
+                       class="input"
+                       placeholder="Ex: Sprint 15 - Módulo Financeiro">
+
+            </div>
+
+        </div>
+
+        <div class="sprint-box">
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Meta da Sprint
+                </label>
+
+                <textarea id="metaSprint"
+                          oninput="atualizarResumo()"
+                          placeholder="Ex: Entregar módulo financeiro completo com dashboard e relatórios."></textarea>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="grid-3">
+
+        <div class="metric-card">
+
+            <div class="metric-title">
+                Time Scrum
+            </div>
+
+            <div class="metric-number"
+                 id="totalCapacidade">
+                0h
+            </div>
+
+            <div class="metric-sub">
+                Quantidade total de horas disponíveis da Sprint.
+            </div>
+
+            <div class="input-group"
+                 style="margin-top:20px;">
+
+                <label class="input-label">
+                    Quantidade de Desenvolvedores
+                </label>
+
+                <input type="number"
+                       min="0"
+                       value="0"
+                       id="qtdDevs"
+                       class="input"
+                       placeholder="Ex: 6"
+                       oninput="calcularCapacidade()">
+
+            </div>
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Horas por Desenvolvedor
+                </label>
+
+                <input type="number"
+                       min="0"
+                       value="0"
+                       id="horasDev"
+                       class="input"
+                       placeholder="Ex: 40"
+                       oninput="calcularCapacidade()">
+
+            </div>
+
+        </div>
+
+        <div class="metric-card">
+
+            <div class="metric-title">
+                Velocity da Sprint
+            </div>
+
+            <div class="metric-number"
+                 id="velocityNumero">
+                0 pts
+            </div>
+
+            <div class="metric-sub">
+                Total de Story Points planejados.
+            </div>
+
+            <div class="input-group"
+                 style="margin-top:20px;">
+
+                <label class="input-label">
+                    Velocity Esperada
+                </label>
+
+                <input type="number"
+                       min="0"
+                       value="0"
+                       id="velocity"
+                       class="input"
+                       placeholder="Ex: 45"
+                       oninput="atualizarResumo()">
+
+            </div>
+
+        </div>
+
+        <div class="health-box">
+
+            <div class="metric-title">
+                Saúde Sprint
+            </div>
+
+            <div style="color:#475569;line-height:1.7;">
+
+                A saúde mede o equilíbrio entre:
+                capacidade do time,
+                quantidade de pontos
+                e risco da Sprint.
+
+            </div>
+
+            <div class="input-group"
+                 style="margin-top:20px;">
+
+                <input type="range"
+                       min="0"
+                       max="100"
+                       value="70"
+                       id="health"
+                       class="health-range"
+                       oninput="atualizarHealth()">
+
+            </div>
+
+            <div class="health-status"
+                 id="healthTexto">
+                🟢 Sprint saudável
+            </div>
+
+            <div style="margin-top:10px;color:#475569;">
+                Pontos atuais:
+                <strong id="healthAtual">70</strong>
+            </div>
+
+            <div style="margin-top:5px;color:#475569;">
+                Faltam:
+                <strong id="healthFalta">0</strong>
+                pts para atingir a velocity.
+            </div>
+
+            <div class="health-progress">
+
+                <div class="health-progress-bar"
+                     id="healthBar"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="glass-card">
+
+        <div class="section-title">
+            ➕ Adicionar Item no Product Backlog
+        </div>
+
+        <div class="grid-3">
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Nome da Task
+                </label>
+
+                <input type="text"
+                       id="taskNome"
+                       class="input"
+                       placeholder="Ex: Criar dashboard financeiro">
+
+            </div>
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Story Points
+                </label>
+
+                <input type="number"
+                       min="0"
+                       id="taskPontos"
+                       class="input"
+                       placeholder="Ex: 8">
+
+            </div>
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Prioridade
+                </label>
+
+                <select id="taskPrioridade">
+
+                <option value="Sem Prioridade" selected>
+                    Sem Prioridade
+                </option>
+
+                <option value="Alta">
+                    Alta
+                </option>
+
+                <option value="Média">
+                    Média
+                </option>
+
+                <option value="Baixa">
+                    Baixa
+                </option>
+
+            </select>
+
+            </div>
+
+        </div>
+
+        <button class="btn-primary"
+                onclick="adicionarTask()">
+            ➕ Adicionar Task
+        </button>
+
+    </div>
+
+    <div class="backlog-grid">
+
+        <div class="task-column">
+
+            <h3>
+                📋 Product Backlog
+            </h3>
+
+            <div id="productBacklog"></div>
+
+        </div>
+
+        <div class="task-column">
+
+            <h3>
+                🚀 Sprint Backlog
+            </h3>
+
+            <div id="sprintBacklog"></div>
+
+        </div>
+
+    </div>
+
+    <div class="summary-container">
+
+        <div class="summary-topbar">
+
+            <div class="summary-header">
+
+                <div class="summary-icon">
+                    🤖
+                </div>
+
+                <div>
+
+                    <div class="summary-title">
+                        Resumo da Sprint
+                    </div>
+
+                    <div class="summary-subtitle">
+                        Indicadores inteligentes da sprint em tempo real
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="summary-actions">
+
+                <button class="btn-export btn-pdf"
+                        onclick="exportarPDF()">
+
+                    <span>📄</span>
+                    Exportar PDF
+
+                </button>
+
+                <button class="btn-export btn-excel"
+                        onclick="exportarExcel()">
+
+                    <span>📊</span>
+                    Exportar Excel
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="summary"></div>
+
+    </div>
+
+</div>
+
+<div class="toast"
+     id="toast">
+</div>
+
+<div class="modal-overlay"
+     id="modalExcluir"
+     onclick="fecharModal(event)">
+
+    <div class="modal-box">
+
+        <button class="modal-close"
+                onclick="fecharModal()">
+            ✕
+        </button>
+
+        <div class="modal-title">
+            Confirmar exclusão
+        </div>
+
+        <div id="modalTexto"
+             style="line-height:1.8;color:#475569;margin-bottom:25px;">
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:end;">
+
+            <button class="btn-secondary"
+                    onclick="fecharModal()">
+                Cancelar
+            </button>
+
+            <button class="btn-danger"
+                    onclick="confirmarExcluir()">
+                Excluir
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let backlog = [];
+
+    let indexExcluir = -1;
+
+    const API =
+        "http://localhost:5228/api/planning";
+
+    let sprintAtualId = 0;
+
+    function mostrarToast(texto) {
+
+        const toast =
+            document.getElementById("toast");
+
+        toast.innerText = texto;
+
+        toast.style.opacity = "1";
+        toast.style.transform = "translateY(0)";
+
+        setTimeout(() => {
+
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(20px)";
+
+        }, 2500);
+    }
+
+
+    function atualizarHealth() {
+
+        const valor =
+            parseInt(
+                document.getElementById("health").value
+            );
+
+        document.getElementById(
+            "healthAtual"
+        ).innerText = valor;
+
+        document.getElementById(
+            "healthFalta"
+        ).innerText = 100 - valor;
+
+        document.getElementById(
+            "healthBar"
+        ).style.width = valor + "%";
+
+        const texto =
+            document.getElementById(
+                "healthTexto"
+            );
+
+        if (valor >= 80)
+            texto.innerHTML =
+                "🟢 Sprint saudável";
+
+        else if (valor >= 50)
+            texto.innerHTML =
+                "🟡 Sprint moderada";
+
+        else
+            texto.innerHTML =
+                "🔴 Sprint em risco";
+
+        atualizarResumo();
+    }
+
+    function calcularCapacidade() {
+
+        const devs =
+            parseInt(
+                document.getElementById("qtdDevs").value
+            ) || 0;
+
+        const horas =
+            parseInt(
+                document.getElementById("horasDev").value
+            ) || 0;
+
+        const total =
+            devs * horas;
+
+        document.getElementById(
+            "totalCapacidade"
+        ).innerText = total + "h";
+
+        atualizarResumo();
+    }
+
+    function adicionarTask() {
+
+        const campoNome =
+            document.getElementById("taskNome");
+
+        const nome =
+            campoNome.value.trim();
+
+        const pontosCampo =
+            document.getElementById("taskPontos").value;
+
+        const prioridade =
+            document.getElementById("taskPrioridade").value;
+
+        campoNome.classList.remove("input-error");
+
+        if (!nome) {
+
+            campoNome.classList.add("input-error");
+
+            mostrarToast(
+                "O nome da task é obrigatório."
+            );
+
+            campoNome.focus();
+
+            return;
+        }
+
+            const task = {
+
+                nome,
+                pontos: pontosCampo
+                    ? parseInt(pontosCampo)
+                    : 0,
+
+                prioridade,
+                naSprint: false
+            };
+
+        backlog.push(task);
+
+        renderizarBacklogs();
+
+        limparCamposTask();
+
+        atualizarResumo();
+
+        mostrarToast(
+            "Task adicionada."
+        );
+    }
+
+    function limparCamposTask() {
+
+        document.getElementById(
+            "taskNome"
+        ).value = "";
+
+        document.getElementById(
+            "taskPontos"
+        ).value = "";
+
+        document.getElementById(
+            "taskPrioridade"
+        ).value = "Sem Prioridade";
+    }
+
+    function renderizarBacklogs() {
+
+        const product =
+            document.getElementById(
+                "productBacklog"
+            );
+
+        const sprint =
+            document.getElementById(
+                "sprintBacklog"
+            );
+
+        product.innerHTML = "";
+        sprint.innerHTML = "";
+
+        backlog.forEach((task, index) => {
+
+                let cardClasse =
+                    "card-sem";
+
+                let prioridadeClasse =
+                    "priority-sem";
+
+                if (task.prioridade === "Alta") {
+
+                    prioridadeClasse = "priority-alta";
+                    cardClasse = "card-alta";
+                }
+
+                else if (task.prioridade === "Média") {
+
+                    prioridadeClasse = "priority-média";
+                    cardClasse = "card-média";
+                }
+
+                else if (task.prioridade === "Baixa") {
+
+                    prioridadeClasse = "priority-baixa";
+                    cardClasse = "card-baixa";
+                }
+
+            const html = `
+
+                    <div class="task-card ${cardClasse}">
+
+                    <div class="task-name"
+                         title="${task.nome}">
+                        ${task.nome}
+                    </div>
+
+                    <div class="task-points">
+                        ${task.pontos} Story Points
+                    </div>
+
+                    <div class="task-priority ${prioridadeClasse}">
+                        ${task.prioridade}
+                    </div>
+
+                    <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
+
+                        <button class="btn-primary"
+                                onclick="moverTask(${index})">
+
+                            ${task.naSprint
+                        ? "↩ Remover da Sprint"
+                        : "🚀 Colocar na Sprint"}
+
+                        </button>
+
+                        <button class="btn-danger"
+                                onclick="abrirModalExcluir(${index})">
+                            🗑 Excluir
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            if (task.naSprint)
+                sprint.innerHTML += html;
+            else
+                product.innerHTML += html;
+        });
+
+        atualizarResumo();
+    }
+
+    function moverTask(index) {
+
+        backlog[index].naSprint =
+            !backlog[index].naSprint;
+
+        renderizarBacklogs();
+    }
+
+    function abrirModalExcluir(index) {
+
+        indexExcluir = index;
+
+        const nome =
+            backlog[index].nome;
+
+        document.getElementById(
+            "modalTexto"
+        ).innerHTML = `
+
+            Deseja realmente excluir a task:
+
+                <div class="modal-task-name"
+             title="${nome}">
+            ${nome}
+        </div>
+
+        `;
+
+        document.getElementById(
+            "modalExcluir"
+        ).style.display = "flex";
+    }
+
+    function fecharModal(event) {
+
+        if (
+            event &&
+            event.target.id !== "modalExcluir"
+        )
+            return;
+
+        document.getElementById(
+            "modalExcluir"
+        ).style.display = "none";
+    }
+
+    function confirmarExcluir() {
+
+        if (indexExcluir < 0)
+            return;
+
+        backlog.splice(indexExcluir, 1);
+
+        renderizarBacklogs();
+
+        fecharModal();
+
+        mostrarToast(
+            "Task removida."
+        );
+    }
+
+    function removerTask(index) {
+
+        backlog.splice(index, 1);
+
+        renderizarBacklogs();
+
+        mostrarToast(
+            "Task removida."
+        );
+    }
+
+    function atualizarResumo() {
+
+        const nomeSprint =
+            document.getElementById("nomeSprint").value;
+
+        const metaSprint =
+            document.getElementById("metaSprint").value;
+
+        const qtdDevs =
+            parseInt(
+                document.getElementById("qtdDevs").value
+            ) || 0;
+
+        const horas =
+            parseInt(
+                document.getElementById("horasDev").value
+            ) || 0;
+
+        const velocity =
+            parseInt(
+                document.getElementById("velocity").value
+            ) || 0;
+
+        const sprintTasks =
+            backlog.filter(x => x.naSprint);
+
+        const pontos =
+            sprintTasks.reduce((a, b) => {
+
+                const valor =
+                    parseInt(b.pontos);
+
+                return a + (
+                    isNaN(valor)
+                        ? 0
+                        : valor
+                );
+
+            }, 0);
+
+        const capacidade =
+            qtdDevs * horas;
+
+        let health = 0;
+
+        if (velocity > 0) {
+
+            health =
+                Math.min(
+                    Math.max(
+                        Math.round(
+                            (pontos / velocity) * 100
+                        ),
+                        0
+                    ),
+                    100
+                );
+        }
+
+        let healthTexto =
+            "🔴 Sprint em risco";
+
+        if (health >= 80)
+            healthTexto =
+                "🟢 Sprint saudável";
+
+        else if (health >= 50)
+            healthTexto =
+                "🟡 Sprint moderada";
+
+        document.getElementById(
+            "health"
+        ).value = health;
+
+        document.getElementById(
+            "healthAtual"
+        ).innerText = pontos;
+
+        document.getElementById(
+            "healthFalta"
+        ).innerText =
+            velocity - pontos;
+
+        const percentualBarra =
+            velocity > 0
+                ? (pontos / velocity) * 100
+                : 0;
+
+        document.getElementById(
+            "healthBar"
+        ).style.width =
+            Math.min(percentualBarra, 100) + "%";
+
+        document.getElementById(
+            "healthTexto"
+        ).innerHTML = healthTexto;
+
+        document.getElementById(
+            "velocityNumero"
+        ).innerText = velocity + " pts";
+
+        const falta = velocity - pontos;
+
+        document.getElementById(
+            "summary"
+        ).innerHTML = `
+
+            <div class="summary-line">
+                <strong>Nome da Sprint:</strong>
+                ${nomeSprint || "-"}
+            </div>
+
+            <div class="summary-line">
+                <strong>Meta:</strong>
+                ${metaSprint || "-"}
+            </div>
+
+            <div class="summary-line">
+                <strong>Devs:</strong>
+                ${qtdDevs}
+            </div>
+
+            <div class="summary-line">
+                <strong>Horas por Dev:</strong>
+                ${horas}
+            </div>
+
+            <div class="summary-line">
+                <strong>Capacidade:</strong>
+                ${capacidade} horas
+            </div>
+
+            <div class="summary-line">
+                <strong>Velocity Esperada:</strong>
+                ${velocity} pts
+            </div>
+
+            <div class="summary-line">
+                <strong>Tasks na Sprint:</strong>
+                ${sprintTasks.length}
+            </div>
+
+            <div class="summary-line">
+                <strong>Pontos Utilizados:</strong>
+                ${pontos} pts
+            </div>
+
+            <div class="summary-line">
+                <strong>Health da Sprint:</strong>
+                ${health}% (${healthTexto})
+            </div>
+
+            <div class="summary-line">
+                <strong>Faltam:</strong>
+                ${falta} pts para atingir a velocity
+            </div>
+
+        `;
+    }
+
+    function novaSprint() {
+
+        sprintAtualId = 0;
+
+        backlog = [];
+
+        document.getElementById(
+            "filtroSprint"
+        ).value = "";
+
+        document.getElementById(
+            "nomeSprint"
+        ).value = "";
+
+        document.getElementById(
+            "metaSprint"
+        ).value = "";
+
+        document.getElementById(
+            "qtdDevs"
+        ).value = 0;
+
+        document.getElementById(
+            "horasDev"
+        ).value = 0;
+
+        document.getElementById(
+            "velocity"
+        ).value = 0;
+
+        document.getElementById(
+            "taskPrioridade"
+        ).value = "Sem Prioridade";
+
+        renderizarBacklogs();
+
+        calcularCapacidade();
+
+        atualizarResumo();
+
+        mostrarToast(
+            "Nova Sprint iniciada."
+        );
+    }
+
+    async function carregarSprints() {
+
+        const response =
+            await fetch(API);
+
+        const dados =
+            await response.json();
+
+        const select =
+            document.getElementById(
+                "filtroSprint"
+            );
+
+        select.innerHTML = `
+
+                <option value="">
+                    Nova Sprint
+                </option>
+
+            `;
+
+        dados.forEach(x => {
+
+            select.innerHTML += `
+
+                    <option value="${x.id}">
+                        ${x.nomeSprint}
+                    </option>
+
+                `;
+        });
+    }
+
+    async function trocarSprint() {
+
+        const id =
+            document.getElementById(
+                "filtroSprint"
+            ).value;
+
+        if (!id) {
+
+            novaSprint();
+
+            return;
+        }
+
+        const response =
+            await fetch(`${API}/${id}`);
+
+        const sprint =
+            await response.json();
+
+        sprintAtualId =
+            sprint.id;
+
+        document.getElementById(
+            "nomeSprint"
+        ).value =
+            sprint.nomeSprint || "";
+
+        document.getElementById(
+            "metaSprint"
+        ).value =
+            sprint.metaSprint || "";
+
+        document.getElementById(
+            "qtdDevs"
+        ).value =
+            sprint.qtdDevs || 0;
+
+        document.getElementById(
+            "horasDev"
+        ).value =
+            sprint.horasDev || 0;
+
+        document.getElementById(
+            "velocity"
+        ).value =
+            sprint.velocity || 0;
+
+        backlog =
+            sprint.backlog || [];
+
+        renderizarBacklogs();
+
+        calcularCapacidade();
+
+        atualizarResumo();
+
+        mostrarToast(
+            "Sprint carregada."
+        );
+    }
+   
+    atualizarHealth();
+
+    calcularCapacidade();
+
+    atualizarResumo();
+
+    carregarSprints();
+
+    async function salvarPlanning() {
+
+        const campoNomeSprint =
+            document.getElementById("nomeSprint");
+
+        const nomeSprint =
+            campoNomeSprint.value.trim();
+
+        campoNomeSprint.classList.remove("input-error");
+
+        if (!nomeSprint) {
+
+            campoNomeSprint.classList.add("input-error");
+
+            mostrarToast(
+                "Informe o nome da Sprint."
+            );
+
+            campoNomeSprint.focus();
+
+            return;
+        }
+
+        const payload = {
+
+            id: sprintAtualId,
+
+            nomeSprint,
+
+            metaSprint:
+                document.getElementById("metaSprint").value,
+
+            qtdDevs:
+                parseInt(
+                    document.getElementById("qtdDevs").value
+                ) || 0,
+
+            horasDev:
+                parseInt(
+                    document.getElementById("horasDev").value
+                ) || 0,
+
+            capacidade:
+                (
+                    parseInt(
+                        document.getElementById("qtdDevs").value
+                    ) || 0
+                ) *
+                (
+                    parseInt(
+                        document.getElementById("horasDev").value
+                    ) || 0
+                ),
+
+            velocity:
+                parseInt(
+                    document.getElementById("velocity").value
+                ) || 0,
+
+            pontosSprint:
+                backlog
+                    .filter(x => x.naSprint)
+                    .reduce((a, b) =>
+                        a + (
+                            parseInt(b.pontos) || 0
+                        ), 0),
+
+            health:
+                parseInt(
+                    document.getElementById("health").value
+                ) || 0,
+
+            backlog
+        };
+
+        const metodo =
+            sprintAtualId > 0
+                ? "PUT"
+                : "POST";
+
+        const url =
+            sprintAtualId > 0
+                ? `${API}/${sprintAtualId}`
+                : API;
+
+        const response =
+            await fetch(url, {
+
+                method: metodo,
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(payload)
+            });
+
+        if (!response.ok) {
+
+            mostrarToast(
+                "Erro ao salvar Sprint."
+            );
+
+            return;
+        }
+
+        const resultado =
+            await response.json();
+
+        sprintAtualId =
+            resultado.id;
+
+        mostrarToast(
+            "✅ Sprint salva com sucesso!"
+        );
+
+        const botaoSalvar =
+            document.querySelector(
+                '.btn-secondary[onclick="salvarPlanning()"]'
+            );
+
+        botaoSalvar.innerHTML =
+            "✅ Salvo";
+
+        botaoSalvar.classList.add(
+            "btn-salvando"
+        );
+
+        setTimeout(() => {
+
+            botaoSalvar.innerHTML =
+                "💾 Salvar Sprint";
+
+            botaoSalvar.classList.remove(
+                "btn-salvando"
+            );
+
+        }, 2000);
+
+        await carregarSprints();
+
+        document.getElementById(
+            "filtroSprint"
+        ).value = sprintAtualId;
+    }
+
+    async function exportarPDF() {
+
+        const {
+            jsPDF
+        } = window.jspdf;
+
+        const doc =
+            new jsPDF();
+
+        const nomeSprint =
+            document.getElementById(
+                "nomeSprint"
+            ).value || "-";
+
+        const metaSprint =
+            document.getElementById(
+                "metaSprint"
+            ).value || "-";
+
+        const qtdDevs =
+            parseInt(
+                document.getElementById(
+                    "qtdDevs"
+                ).value
+            ) || 0;
+
+        const horas =
+            parseInt(
+                document.getElementById(
+                    "horasDev"
+                ).value
+            ) || 0;
+
+        const velocity =
+            parseInt(
+                document.getElementById(
+                    "velocity"
+                ).value
+            ) || 0;
+
+        const sprintTasks =
+            backlog.filter(x => x.naSprint);
+
+        const pontos =
+            sprintTasks.reduce(
+                (a, b) => {
+
+                    const valor =
+                        parseInt(b.pontos);
+
+                    return a + (
+                        isNaN(valor)
+                            ? 0
+                            : valor
+                    );
+
+                },
+                0
+            );
+
+        const health =
+            parseInt(
+                document.getElementById(
+                    "health"
+                ).value
+            );
+
+        const dataAtual =
+            new Date()
+                .toLocaleString(
+                    "pt-BR"
+                );
+
+        let y = 20;
+
+        doc.setFillColor(37, 99, 235);
+
+        doc.rect(
+            0,
+            0,
+            210,
+            40,
+            "F"
+        );
+
+        doc.setTextColor(255,255,255);
+
+        doc.setFontSize(28);
+
+        doc.text(
+            "SPRINT PLANNING",
+            20,
+            22
+        );
+
+        doc.setFontSize(11);
+
+        doc.text(
+            dataAtual,
+            20,
+            32
+        );
+
+        doc.setTextColor(15,23,42);
+
+        y = 55;
+
+        doc.setFontSize(22);
+
+        doc.text(
+            nomeSprint,
+            20,
+            y
+        );
+
+        y += 10;
+
+        doc.setFontSize(12);
+
+        const metaLinhas =
+            doc.splitTextToSize(
+                metaSprint,
+                170
+            );
+
+        doc.text(
+            metaLinhas,
+            20,
+            y
+        );
+
+        y += (
+            metaLinhas.length * 7
+        ) + 10;
+
+        // CARDS
+
+        const cards = [
+
+            {
+                titulo: "Devs",
+                valor: qtdDevs
+            },
+
+            {
+                titulo: "Capacidade",
+                valor: `${ qtdDevs * horas } h`
+            },
+
+            {
+                titulo: "Velocity",
+                valor: `${ velocity } pts`
+            },
+
+            {
+                titulo: "Story Points",
+                valor: pontos
+            }
+        ];
+
+        let x = 20;
+
+        cards.forEach(card => {
+
+            doc.setFillColor(
+                248,
+                250,
+                252
+            );
+
+            doc.roundedRect(
+                x,
+                y,
+                38,
+                28,
+                4,
+                4,
+                "F"
+            );
+
+            doc.setFontSize(10);
+
+            doc.setTextColor(
+                100,
+                116,
+                139
+            );
+
+            doc.text(
+                card.titulo,
+                x + 4,
+                y + 9
+            );
+
+            doc.setFontSize(16);
+
+            doc.setTextColor(
+                37,
+                99,
+                235
+            );
+
+            doc.text(
+                String(card.valor),
+                x + 4,
+                y + 20
+            );
+
+            x += 43;
+        });
+
+        y += 42;
+
+        doc.setFontSize(16);
+
+        doc.setTextColor(15,23,42);
+
+        doc.text(
+            "Saúde da Sprint",
+            20,
+            y
+        );
+
+        y += 10;
+
+        doc.setFillColor(
+            226,
+            232,
+            240
+        );
+
+        doc.roundedRect(
+            20,
+            y,
+            170,
+            10,
+            5,
+            5,
+            "F"
+        );
+
+        let healthColor = [34,197,94];
+
+        if (health < 80)
+            healthColor = [234,179,8];
+
+        if (health < 50)
+            healthColor = [239,68,68];
+
+        doc.setFillColor(
+            healthColor[0],
+            healthColor[1],
+            healthColor[2]
+        );
+
+        doc.roundedRect(
+            20,
+            y,
+            health * 1.7,
+            10,
+            5,
+            5,
+            "F"
+        );
+
+        y += 20;
+
+        doc.setFontSize(20);
+
+        doc.setTextColor(
+            15,
+            23,
+            42
+        );
+
+        doc.text(
+            "Tasks da Sprint",
+            20,
+            y
+        );
+
+        y += 12;
+
+        sprintTasks.forEach((task, index) => {
+
+            if (y > 260) {
+
+                doc.addPage();
+
+                y = 20;
+            }
+
+            let cor = [148,163,184];
+
+            if (task.prioridade === "Alta")
+                cor = [239,68,68];
+
+            else if (task.prioridade === "Média")
+                cor = [234,179,8];
+
+            else if (task.prioridade === "Baixa")
+                cor = [34,197,94];
+
+            doc.setFillColor(
+                255,
+                255,
+                255
+            );
+
+            doc.roundedRect(
+                20,
+                y,
+                170,
+                28,
+                5,
+                5,
+                "F"
+            );
+
+            doc.setDrawColor(
+                cor[0],
+                cor[1],
+                cor[2]
+            );
+
+            doc.setLineWidth(2);
+
+            doc.line(
+                20,
+                y,
+                20,
+                y + 28
+            );
+
+            doc.setFontSize(12);
+
+            doc.setTextColor(
+                15,
+                23,
+                42
+            );
+
+            const nomeTask =
+                doc.splitTextToSize(
+                    task.nome,
+                    120
+                );
+
+            doc.text(
+                nomeTask,
+                28,
+                y + 10
+            );
+
+            doc.setFontSize(11);
+
+            doc.setTextColor(
+                cor[0],
+                cor[1],
+                cor[2]
+            );
+
+            doc.text(
+                `${ task.pontos } pts`,
+                150,
+                y + 11
+            );
+
+            doc.text(
+                task.prioridade,
+                150,
+                y + 20
+            );
+
+            y += 35;
+        });
+
+        doc.save(
+            `${ nomeSprint }.pdf`
+        );
+
+        mostrarToast(
+            "PDF exportado com sucesso."
+        );
+    }
+
+    async function exportarExcel() {
+
+        const nomeSprint =
+            document.getElementById(
+                "nomeSprint"
+            ).value || "Sprint";
+
+        const metaSprint =
+            document.getElementById(
+                "metaSprint"
+            ).value || "-";
+
+        const qtdDevs =
+            parseInt(
+                document.getElementById(
+                    "qtdDevs"
+                ).value
+            ) || 0;
+
+        const horas =
+            parseInt(
+                document.getElementById(
+                    "horasDev"
+                ).value
+            ) || 0;
+
+        const velocity =
+            parseInt(
+                document.getElementById(
+                    "velocity"
+                ).value
+            ) || 0;
+
+        const health =
+            document.getElementById(
+                "health"
+            ).value;
+
+        const sprintTasks =
+            backlog.filter(x => x.naSprint);
+
+        const productTasks =
+            backlog.filter(x => !x.naSprint);
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        const resumoDados = [
+
+            ["SPRINT PLANNING"],
+
+            [],
+
+            ["Nome Sprint", nomeSprint],
+
+            ["Meta Sprint", metaSprint],
+
+            ["Quantidade Devs", qtdDevs],
+
+            ["Horas por Dev", horas],
+
+            ["Capacidade", `${ qtdDevs * horas } h`],
+
+            ["Velocity", `${ velocity } pts`],
+
+            ["Health", `${ health } /100`],
+
+            ["Tasks Sprint", sprintTasks.length],
+
+            ["Tasks Backlog", productTasks.length]
+        ];
+
+        const wsResumo =
+            XLSX.utils.aoa_to_sheet(
+                resumoDados
+            );
+
+        wsResumo["!cols"] = [
+
+            { wch: 30 },
+
+            { wch: 70 }
+        ];
+
+        estilizarCabecalho(wsResumo, "A1", "1D4ED8");
+
+        estilizarResumo(wsResumo);
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            wsResumo,
+            "Resumo"
+        );
+
+        const sprintDados = [
+
+            [
+                "Task",
+                "Story Points",
+                "Prioridade",
+                "Status"
+            ]
+        ];
+
+        sprintTasks.forEach(task => {
+
+            sprintDados.push([
+
+                task.nome,
+
+                task.pontos,
+
+                task.prioridade,
+
+                "Sprint"
+            ]);
+        });
+
+        if (!sprintTasks.length) {
+
+            sprintDados.push([
+                "Nenhuma task na Sprint",
+                "-",
+                "-",
+                "-"
+            ]);
+        }
+
+        const wsSprint =
+            XLSX.utils.aoa_to_sheet(
+                sprintDados
+            );
+
+        wsSprint["!cols"] = [
+
+            { wch: 60 },
+
+            { wch: 18 },
+
+            { wch: 20 },
+
+            { wch: 20 }
+        ];
+
+        estilizarTabela(wsSprint, sprintDados);
+        wsSprint["A1"].s = wsSprint["A1"].s || {};
+        wsSprint["A1"].s.fill = { fgColor: { rgb: "7C3AED" } };
+        wsSprint["A1"].s.font = { bold: true, color: { rgb: "FFFFFF" } };
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            wsSprint,
+            "Sprint Backlog"
+        );
+
+        const backlogDados = [
+
+            [
+                "Task",
+                "Story Points",
+                "Prioridade",
+                "Status"
+            ]
+        ];
+
+        productTasks.forEach(task => {
+
+            backlogDados.push([
+
+                task.nome,
+
+                task.pontos,
+
+                task.prioridade,
+
+                "Backlog"
+            ]);
+        });
+
+        if (!productTasks.length) {
+
+            backlogDados.push([
+                "Nenhuma task no backlog",
+                "-",
+                "-",
+                "-"
+            ]);
+        }
+
+        const wsBacklog =
+            XLSX.utils.aoa_to_sheet(
+                backlogDados
+            );
+
+        wsBacklog["!cols"] = [
+
+            { wch: 60 },
+
+            { wch: 18 },
+
+            { wch: 20 },
+
+            { wch: 20 }
+        ];
+
+        estilizarTabela(wsBacklog, backlogDados);
+        wsBacklog["A1"].s = wsBacklog["A1"].s || {};
+        wsBacklog["A1"].s.fill = { fgColor: { rgb: "16A34A" } };
+        wsBacklog["A1"].s.font = { bold: true, color: { rgb: "FFFFFF" } };
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            wsBacklog,
+            "Product Backlog"
+        );
+        
+        XLSX.writeFile(
+            workbook,
+            `${nomeSprint}.xlsx`
+        );
+
+        mostrarToast(
+            "Excel exportado com visual profissional."
+        );
+    }
+
+    function estilizarCabecalho(sheet, celula, cor = "2563EB") {
+
+        sheet[celula].s = {
+
+            font: {
+                bold: true,
+                sz: 22,
+                color: { rgb: "FFFFFF" }
+            },
+
+            fill: {
+                fgColor: { rgb: cor }
+            },
+
+            alignment: {
+                horizontal: "center",
+                vertical: "center"
+            }
+        };
+
+        sheet["!merges"] = [
+            {
+                s: { r: 0, c: 0 },
+                e: { r: 0, c: 1 }
+            }
+        ];
+    }
+
+    function estilizarResumo(sheet) {
+
+        const range =
+            XLSX.utils.decode_range(
+                sheet["!ref"]
+            );
+
+        for (
+            let R = 2;
+            R <= range.e.r;
+            ++R
+        ) {
+
+            const cellA =
+                XLSX.utils.encode_cell({
+                    r: R,
+                    c: 0
+                });
+
+            const cellB =
+                XLSX.utils.encode_cell({
+                    r: R,
+                    c: 1
+                });
+
+            if (sheet[cellA]) {
+
+                sheet[cellA].s = {
+
+                    font: {
+                        bold: true,
+                        color: {
+                            rgb: "0F172A"
+                        }
+                    },
+
+                    fill: {
+                        fgColor: {
+                            rgb: "DBEAFE"
+                        }
+                    },
+
+                    border: bordaPadrao(),
+
+                    alignment: {
+                        vertical: "center"
+                    }
+                };
+            }
+
+            if (sheet[cellB]) {
+
+                sheet[cellB].s = {
+
+                    border: bordaPadrao(),
+
+                    alignment: {
+                        wrapText: true,
+                        vertical: "center"
+                    }
+                };
+            }
+        }
+    }
+
+    function estilizarTabela(sheet, dados) {
+
+        const range =
+            XLSX.utils.decode_range(
+                sheet["!ref"]
+            );
+
+        for (
+            let R = 0;
+            R <= range.e.r;
+            ++R
+        ) {
+
+            for (
+                let C = 0;
+                C <= range.e.c;
+                ++C
+            ) {
+
+                const cell =
+                    XLSX.utils.encode_cell({
+                        r: R,
+                        c: C
+                    });
+
+                if (!sheet[cell])
+                    continue;
+
+                if (R === 0) {
+
+                    sheet[cell].s = {
+
+                        font: {
+                            bold: true,
+                            color: {
+                                rgb: "FFFFFF"
+                            }
+                        },
+
+                        fill: {
+                            fgColor: {
+                                rgb: "2563EB"
+                            }
+                        },
+
+                        border: bordaPadrao(),
+
+                        alignment: {
+                            horizontal: "center",
+                            vertical: "center"
+                        }
+                    };
+                }
+
+                else {
+
+                    let cor =
+                        "FFFFFF";
+
+                    const prioridade =
+                        dados[R][2];
+
+                    if (prioridade === "Alta")
+                        cor = "FEE2E2";
+
+                    else if (prioridade === "Média")
+                        cor = "FEF9C3";
+
+                    else if (prioridade === "Baixa")
+                        cor = "DCFCE7";
+
+                    sheet[cell].s = {
+
+                        fill: {
+                            fgColor: {
+                                rgb: cor
+                            }
+                        },
+
+                        border: bordaPadrao(),
+
+                        alignment: {
+                            vertical: "center",
+                            wrapText: true
+                        }
+                    };
+                }
+            }
+        }
+
+        sheet["!autofilter"] = {
+
+            ref: sheet["!ref"]
+        };
+    }
+
+    function bordaPadrao() {
+
+        return {
+
+            top: {
+                style: "thin",
+                color: {
+                    rgb: "CBD5E1"
+                }
+            },
+
+            bottom: {
+                style: "thin",
+                color: {
+                    rgb: "CBD5E1"
+                }
+            },
+
+            left: {
+                style: "thin",
+                color: {
+                    rgb: "CBD5E1"
+                }
+            },
+
+            right: {
+                style: "thin",
+                color: {
+                    rgb: "CBD5E1"
+                }
+            }
+        };
+    }
+
+    window.onload = async () => {
+
+        atualizarHealth();
+
+        calcularCapacidade();
+
+        atualizarResumo();
+
+        await carregarSprints();
+    };
+</script>

@@ -1,0 +1,48 @@
+﻿@model ErrorViewModel
+
+@{
+    ViewData["Title"] = "Erro";
+}
+
+<div class="error-container">
+
+    <div class="error-card">
+
+        <div class="error-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h1>Ops! Algo deu errado</h1>
+
+        <p>
+            Ocorreu um erro inesperado durante o processamento da sua solicitação.
+            Nossa equipe pode utilizar as informações abaixo para análise.
+        </p>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="request-box">
+                <strong>ID da Requisição:</strong>
+                <code>@Model.RequestId</code>
+            </div>
+        }
+
+        <div class="error-actions">
+
+            <a href="/"
+               class="btn-modern">
+                <i class="fa-solid fa-house"></i>
+                Voltar ao Início
+            </a>
+
+            <button class="btn-outline-modern"
+                    onclick="history.back()">
+                <i class="fa-solid fa-arrow-left"></i>
+                Página Anterior
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
